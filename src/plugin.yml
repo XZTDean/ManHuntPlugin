@@ -1,0 +1,12 @@
+name: ManHunt
+version: 1.0
+author: DeanX
+main: me.deanx.manhunt.Main
+description: ManHunt help plugin
+api-version: 1.16
+
+commands:
+  hello:
+    description: Test command
+  ManHunt:
+    description: ManHunt Command
