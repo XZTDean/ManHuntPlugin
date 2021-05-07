@@ -67,6 +67,14 @@ public class ManHunt implements CommandExecutor {
         runner.getInventory().addItem(new ItemStack(Material.OAK_LOG, 5));
         setInitialState(runner);
         runner.sendMessage("You are Runner. RUN!");
+        new Thread(() -> {
+            try {
+                Thread.sleep(15000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            runner.sendMessage("Hunter start hunting now.");
+        });
     }
 
     private void setHunter(Player hunter) {
@@ -79,6 +87,21 @@ public class ManHunt implements CommandExecutor {
         hunter.setBedSpawnLocation(runner.getLocation());
         setInitialState(hunter);
         hunter.sendMessage("You are hunter, please wait for 15s.");
+        new Thread(() -> {
+            waitingCountdown(hunter, 15);
+        }).start();
+    }
+
+    private void waitingCountdown(Player player, int time) {
+        for (int i = time; i > 0; i--) {
+            player.sendTitle(String.valueOf(i), "", 2, 16, 2);
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        player.sendTitle("Go!", "", 2, 16, 2);
     }
 
     private void setInitialState(Player player) {
@@ -97,7 +120,7 @@ public class ManHunt implements CommandExecutor {
     }
 
     private String labelPlayer(String name) {
-        Player p = gerPlayer(name);
+        Player p = getPlayer(name);
         if (p != null) {
             runner = p;
             return "";
@@ -106,7 +129,7 @@ public class ManHunt implements CommandExecutor {
         }
     }
 
-    private Player gerPlayer(String name) {
+    private Player getPlayer(String name) {
         Player[] playerList = Bukkit.getOnlinePlayers().toArray(new Player[0]);
         for (Player p : playerList) {
             if (p.getName().equalsIgnoreCase(name)) {
