@@ -74,7 +74,7 @@ public class ManHunt implements CommandExecutor {
                 e.printStackTrace();
             }
             runner.sendMessage("Hunter start hunting now.");
-        });
+        }).start();
     }
 
     private void setHunter(Player hunter) {
@@ -83,6 +83,7 @@ public class ManHunt implements CommandExecutor {
         hunter.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 300, 0));
         hunter.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_DIGGING, 300, 128));
         hunter.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 300, 128));
+        hunter.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 300, 129)); // 129 for -128
         hunter.addPotionEffect(new PotionEffect(PotionEffectType.HEAL, 300, 128));
         hunter.setBedSpawnLocation(runner.getLocation());
         setInitialState(hunter);
