@@ -10,13 +10,18 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
 
 public class Respawn implements Listener {
+    private final ManHuntPlugin plugin;
+
     public Respawn(ManHuntPlugin plugin) {
+        this.plugin = plugin;
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
     @EventHandler
     public void onRespawn(PlayerRespawnEvent event) {
         Player player = event.getPlayer();
-        player.getInventory().addItem(new ItemStack(Material.COMPASS));
+        if (plugin.isHunter(player)) {
+            player.getInventory().addItem(new ItemStack(Material.COMPASS));
+        }
     }
 }
