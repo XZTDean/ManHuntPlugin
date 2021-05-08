@@ -121,22 +121,12 @@ public class ManHunt implements CommandExecutor {
     }
 
     private String labelPlayer(String name) {
-        Player p = getPlayer(name);
+        Player p = Bukkit.getPlayer(name);
         if (p != null) {
             runner = p;
             return "";
         } else {
             return "Can't find player " + name;
         }
-    }
-
-    private Player getPlayer(String name) {
-        Player[] playerList = Bukkit.getOnlinePlayers().toArray(new Player[0]);
-        for (Player p : playerList) {
-            if (p.getName().equalsIgnoreCase(name)) {
-                return p;
-            }
-        }
-        return null;
     }
 }
