@@ -2,8 +2,10 @@ package me.deanx.manhunt;
 
 import me.deanx.manhunt.command.ManHunt;
 import me.deanx.manhunt.listener.Respawn;
+import me.deanx.manhunt.listener.Result;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayList;
@@ -17,7 +19,6 @@ public class ManHuntPlugin extends JavaPlugin {
     public void onEnable() {
         getLogger().info("ManHunt plugin start");
         new ManHunt(this);
-        new Respawn(this);
     }
 
     @Override
@@ -46,9 +47,15 @@ public class ManHuntPlugin extends JavaPlugin {
         this.hunters.remove(hunter);
     }
 
+    public void registerListener() {
+        new Respawn(this);
+        new Result(this);
+    }
+
     public void endGame() {
         runner = null;
         hunters.clear();
+        HandlerList.unregisterAll(this);
     }
 
     public void runnerLose() {

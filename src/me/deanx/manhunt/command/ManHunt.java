@@ -58,6 +58,7 @@ public class ManHunt implements CommandExecutor {
                 plugin.addHunter(p);
             }
         }
+        plugin.registerListener();
         return "";
     }
 
@@ -89,7 +90,7 @@ public class ManHunt implements CommandExecutor {
         hunter.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 300, 128));
         hunter.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 300, 129)); // 129 for -128
         hunter.addPotionEffect(new PotionEffect(PotionEffectType.HEAL, 300, 128));
-        hunter.setBedSpawnLocation(plugin.getRunner().getLocation());
+        hunter.setBedSpawnLocation(plugin.getRunner().getLocation(), true);
         setInitialState(hunter);
         hunter.sendMessage("You are hunter, please wait for 15s.");
         new Thread(() -> waitingCountdown(hunter, 15)).start();
