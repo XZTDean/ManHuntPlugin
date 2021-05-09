@@ -18,10 +18,12 @@ import org.bukkit.potion.PotionEffectType;
 import java.util.Iterator;
 
 public class ManHunt implements CommandExecutor {
+    private final ManHuntPlugin plugin;
+
     public ManHunt(ManHuntPlugin plugin) {
+        this.plugin = plugin;
         plugin.getCommand("ManHunt").setExecutor(this);
     }
-    private Player runner;
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -32,7 +34,7 @@ public class ManHunt implements CommandExecutor {
         if (args[0].equalsIgnoreCase("start")) {
             ret = start();
         } else if (args[0].equalsIgnoreCase("stop")) {
-            runner = null;
+            plugin.endGame();
         } else {
             ret = labelPlayer(args[0]);
         }
@@ -43,21 +45,23 @@ public class ManHunt implements CommandExecutor {
     }
 
     private String start() {
-        if (runner == null) {
+        if (plugin.getRunner() == null) {
             return "Please set the runner first";
         }
+        Player runner = plugin.getRunner();
         runner.getWorld().setTime(1000);
-        setRunner();
+        setRunner(runner);
         Player[] playerList = Bukkit.getOnlinePlayers().toArray(new Player[0]);
         for (Player p : playerList) {
             if (p != runner) {
                 setHunter(p);
+                plugin.addHunter(p);
             }
         }
         return "";
     }
 
-    private void setRunner() {
+    private void setRunner(Player runner) {
         runner.getInventory().clear();
         runner.getInventory().setHelmet(new ItemStack(Material.LEATHER_HELMET));
         runner.getInventory().setChestplate(new ItemStack(Material.LEATHER_CHESTPLATE));
@@ -85,12 +89,10 @@ public class ManHunt implements CommandExecutor {
         hunter.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 300, 128));
         hunter.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 300, 129)); // 129 for -128
         hunter.addPotionEffect(new PotionEffect(PotionEffectType.HEAL, 300, 128));
-        hunter.setBedSpawnLocation(runner.getLocation());
+        hunter.setBedSpawnLocation(plugin.getRunner().getLocation());
         setInitialState(hunter);
         hunter.sendMessage("You are hunter, please wait for 15s.");
-        new Thread(() -> {
-            waitingCountdown(hunter, 15);
-        }).start();
+        new Thread(() -> waitingCountdown(hunter, 15)).start();
     }
 
     private void waitingCountdown(Player player, int time) {
@@ -123,7 +125,7 @@ public class ManHunt implements CommandExecutor {
     private String labelPlayer(String name) {
         Player p = Bukkit.getPlayer(name);
         if (p != null) {
-            runner = p;
+            plugin.setRunner(p);
             return "";
         } else {
             return "Can't find player " + name;

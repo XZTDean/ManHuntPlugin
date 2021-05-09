@@ -2,14 +2,16 @@ package me.deanx.manhunt;
 
 import me.deanx.manhunt.command.ManHunt;
 import me.deanx.manhunt.listener.Respawn;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ManHuntPlugin extends JavaPlugin {
     private Player runner;
-    private List<Player> hunters;
+    private final List<Player> hunters = new ArrayList<>();
 
     @Override
     public void onEnable() {
@@ -44,16 +46,28 @@ public class ManHuntPlugin extends JavaPlugin {
         this.hunters.remove(hunter);
     }
 
-    public void newGame() {
+    public void endGame() {
         runner = null;
         hunters.clear();
     }
 
-    public void runnerLost() {
-        // Wait for implements
+    public void runnerLose() {
+        runner.playSound(runner.getLocation(), Sound.ENTITY_IRON_GOLEM_DEATH, 1, 1);
+        runner.sendTitle("You Lose", "", 20, 40, 20);
+        for (Player hunter : hunters) {
+            hunter.playSound(hunter.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1, 1);
+            hunter.sendTitle("You Win", "Runner is killed", 20, 40, 20);
+        }
+        endGame();
     }
 
     public void runnerWin() {
-        // Wait for implements
+        runner.playSound(runner.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1, 1);
+        runner.sendTitle("You Win", "", 20, 40, 20);
+        for (Player hunter : hunters) {
+            hunter.playSound(hunter.getLocation(), Sound.ENTITY_IRON_GOLEM_DEATH, 1, 1);
+            hunter.sendTitle("You Lose", "Runner Entered Nether", 20, 40, 20);
+        }
+        endGame();
     }
 }
