@@ -1,6 +1,8 @@
 package me.deanx.manhunt;
 
 import me.deanx.manhunt.command.ManHunt;
+import me.deanx.manhunt.interfaces.CompassNBT;
+import me.deanx.manhunt.listener.MoveTest;
 import me.deanx.manhunt.listener.Respawn;
 import me.deanx.manhunt.listener.Result;
 import org.bukkit.Sound;
@@ -13,12 +15,15 @@ import java.util.List;
 
 public class ManHuntPlugin extends JavaPlugin {
     private Player runner;
+    private CompassNBT compassNBT;
     private final List<Player> hunters = new ArrayList<>();
 
     @Override
     public void onEnable() {
         getLogger().info("ManHunt plugin start");
+        compassNBT = CompassNBT.newInstance();
         new ManHunt(this);
+        new MoveTest(this);
     }
 
     @Override
@@ -76,5 +81,12 @@ public class ManHuntPlugin extends JavaPlugin {
             hunter.sendTitle("You Lose", "Runner Entered Nether", 20, 40, 20);
         }
         endGame();
+    }
+
+    public void updateCompass() {
+        compassNBT.updateCompass(runner);
+        for (Player hunter : hunters) {
+            compassNBT.updateInventory(hunter);
+        }
     }
 }
