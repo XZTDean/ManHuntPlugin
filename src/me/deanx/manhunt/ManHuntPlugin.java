@@ -1,6 +1,7 @@
 package me.deanx.manhunt;
 
 import me.deanx.manhunt.command.ManHunt;
+import me.deanx.manhunt.command.ManHuntTabCompleter;
 import me.deanx.manhunt.interfaces.CompassNBT;
 import me.deanx.manhunt.listener.DropItem;
 import me.deanx.manhunt.listener.Respawn;
@@ -25,6 +26,7 @@ public class ManHuntPlugin extends JavaPlugin {
         getLogger().info("ManHunt plugin start");
         compassNBT = CompassNBT.newInstance();
         new ManHunt(this);
+        new ManHuntTabCompleter(this);
     }
 
     @Override

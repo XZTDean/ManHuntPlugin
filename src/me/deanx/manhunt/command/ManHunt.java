@@ -2,7 +2,6 @@ package me.deanx.manhunt.command;
 
 import me.deanx.manhunt.ManHuntPlugin;
 import me.deanx.manhunt.interfaces.CompassNBT;
-import me.deanx.manhunt.interfaces.CompassNBT_v1_16_R3;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
