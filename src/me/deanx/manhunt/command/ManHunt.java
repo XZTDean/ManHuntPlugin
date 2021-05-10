@@ -1,6 +1,8 @@
 package me.deanx.manhunt.command;
 
 import me.deanx.manhunt.ManHuntPlugin;
+import me.deanx.manhunt.interfaces.CompassNBT;
+import me.deanx.manhunt.interfaces.CompassNBT_v1_16_R3;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -35,6 +37,10 @@ public class ManHunt implements CommandExecutor {
             ret = start();
         } else if (args[0].equalsIgnoreCase("stop")) {
             plugin.endGame();
+        } else if (args[0].equalsIgnoreCase("compass")) {
+            if (sender instanceof Player) {
+                giveCompass((Player) sender);
+            }
         } else {
             ret = labelPlayer(args[0]);
         }
@@ -106,6 +112,13 @@ public class ManHunt implements CommandExecutor {
             }
         }
         player.sendTitle("Go!", "", 2, 16, 2);
+    }
+
+    private void giveCompass(Player player) {
+        player.getInventory().addItem(new ItemStack(Material.COMPASS));
+        if (plugin.isStart()) {
+            CompassNBT.newInstance().updateInventory(player);
+        }
     }
 
     private void setInitialState(Player player) {

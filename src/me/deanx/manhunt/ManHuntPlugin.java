@@ -2,9 +2,10 @@ package me.deanx.manhunt;
 
 import me.deanx.manhunt.command.ManHunt;
 import me.deanx.manhunt.interfaces.CompassNBT;
-import me.deanx.manhunt.listener.MoveTest;
+import me.deanx.manhunt.listener.DropItem;
 import me.deanx.manhunt.listener.Respawn;
 import me.deanx.manhunt.listener.Result;
+import me.deanx.manhunt.listener.RunnerLocation;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
@@ -15,6 +16,7 @@ import java.util.List;
 
 public class ManHuntPlugin extends JavaPlugin {
     private Player runner;
+    private boolean status;
     private CompassNBT compassNBT;
     private final List<Player> hunters = new ArrayList<>();
 
@@ -23,7 +25,6 @@ public class ManHuntPlugin extends JavaPlugin {
         getLogger().info("ManHunt plugin start");
         compassNBT = CompassNBT.newInstance();
         new ManHunt(this);
-        new MoveTest(this);
     }
 
     @Override
@@ -55,12 +56,20 @@ public class ManHuntPlugin extends JavaPlugin {
     public void registerListener() {
         new Respawn(this);
         new Result(this);
+        new RunnerLocation(this);
+        new DropItem(this);
+        status = true;
     }
 
     public void endGame() {
         runner = null;
         hunters.clear();
         HandlerList.unregisterAll(this);
+        status = false;
+    }
+
+    public boolean isStart() {
+        return status;
     }
 
     public void runnerLose() {
