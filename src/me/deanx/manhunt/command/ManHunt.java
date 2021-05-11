@@ -40,8 +40,8 @@ public class ManHunt implements CommandExecutor {
             if (sender instanceof Player) {
                 giveCompass((Player) sender);
             }
-        } else {
-            ret = labelPlayer(args[0]);
+        } else if (args[0].equalsIgnoreCase("runner")) {
+            ret = labelPlayer(args[1]);
         }
         if (!ret.isEmpty()) {
             sender.sendMessage(ret);
@@ -83,7 +83,7 @@ public class ManHunt implements CommandExecutor {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            runner.sendMessage("Hunter start hunting now.");
+            runner.sendMessage("Hunters start hunting now.");
         }).start();
     }
 
@@ -116,7 +116,7 @@ public class ManHunt implements CommandExecutor {
     private void giveCompass(Player player) {
         player.getInventory().addItem(new ItemStack(Material.COMPASS));
         if (plugin.isStart()) {
-            CompassNBT.newInstance().updateInventory(player);
+            CompassNBT.getInstance().updateInventory(player);
         }
     }
 
@@ -139,6 +139,7 @@ public class ManHunt implements CommandExecutor {
         Player p = Bukkit.getPlayer(name);
         if (p != null) {
             plugin.setRunner(p);
+            Bukkit.getServer().broadcastMessage(p.getDisplayName() + " is set to be Runner.");
             return "";
         } else {
             return "Can't find player " + name;

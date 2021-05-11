@@ -11,7 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class ManHuntTabCompleter implements TabCompleter {
-    private final List<String> COMMANDS = Arrays.asList("start", "stop", "compass");
+    private final List<String> COMMANDS = Arrays.asList("start", "stop", "compass", "runner");
 
     public ManHuntTabCompleter(ManHuntPlugin plugin) {
         plugin.getCommand("ManHunt").setTabCompleter(this);
@@ -20,7 +20,16 @@ public class ManHuntTabCompleter implements TabCompleter {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
         List<String> hint = new ArrayList<>();
-        StringUtil.copyPartialMatches(args[0], COMMANDS, hint);
+        switch (args.length) {
+            case 1:
+                StringUtil.copyPartialMatches(args[0], COMMANDS, hint);
+                break;
+            case 2:
+                if (args[0].equalsIgnoreCase("runner")) {
+                    return null;
+                }
+                break;
+        }
         return hint;
     }
 }

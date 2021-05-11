@@ -8,7 +8,15 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 
 public class CompassNBT_v1_16_R3 implements CompassNBT {
+    private static CompassNBT_v1_16_R3 instance;
     private org.bukkit.inventory.ItemStack compass;
+
+    public static CompassNBT getInstance() {
+        if (instance == null) {
+            instance = new CompassNBT_v1_16_R3();
+        }
+        return instance;
+    }
 
     @Override
     public void updateCompass(Player runner) {
@@ -32,6 +40,8 @@ public class CompassNBT_v1_16_R3 implements CompassNBT {
         Inventory inventory = player.getInventory();
         int stackNum = inventory.first(Material.COMPASS);
 
-        inventory.setItem(stackNum, compass);
+        if (stackNum >= 0) {
+            inventory.setItem(stackNum, compass);
+        }
     }
 }

@@ -24,7 +24,7 @@ public class ManHuntPlugin extends JavaPlugin {
     @Override
     public void onEnable() {
         getLogger().info("ManHunt plugin start");
-        compassNBT = CompassNBT.newInstance();
+        compassNBT = CompassNBT.getInstance();
         new ManHunt(this);
         new ManHuntTabCompleter(this);
     }
