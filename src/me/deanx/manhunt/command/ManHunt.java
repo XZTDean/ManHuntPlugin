@@ -42,6 +42,8 @@ public class ManHunt implements CommandExecutor {
             }
         } else if (args[0].equalsIgnoreCase("runner")) {
             ret = labelPlayer(args[1]);
+        } else {
+            return false;
         }
         if (!ret.isEmpty()) {
             sender.sendMessage(ret);
@@ -52,6 +54,8 @@ public class ManHunt implements CommandExecutor {
     private String start() {
         if (plugin.getRunner() == null) {
             return "Please set the runner first";
+        } else if (plugin.isStart()) {
+            return "Hunting Game is already running.";
         }
         Player runner = plugin.getRunner();
         runner.getWorld().setTime(1000);
@@ -75,6 +79,7 @@ public class ManHunt implements CommandExecutor {
         runner.getInventory().setBoots(new ItemStack(Material.LEATHER_BOOTS));
         runner.getInventory().addItem(new ItemStack(Material.WOODEN_AXE));
         runner.getInventory().addItem(new ItemStack(Material.OAK_LOG, 5));
+        runner.getInventory().addItem(new ItemStack(Material.COOKED_BEEF, 2));
         setInitialState(runner);
         runner.sendMessage("You are Runner. RUN!");
         new Thread(() -> {
@@ -136,6 +141,9 @@ public class ManHunt implements CommandExecutor {
     }
 
     private String labelPlayer(String name) {
+        if (plugin.isStart()) {
+            return "Cannot change runner during game";
+        }
         Player p = Bukkit.getPlayer(name);
         if (p != null) {
             plugin.setRunner(p);
