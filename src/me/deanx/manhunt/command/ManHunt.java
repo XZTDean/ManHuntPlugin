@@ -3,6 +3,7 @@ package me.deanx.manhunt.command;
 import me.deanx.manhunt.ManHuntPlugin;
 import me.deanx.manhunt.interfaces.CompassNBT;
 import org.bukkit.Bukkit;
+import org.bukkit.Difficulty;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.advancement.Advancement;
@@ -11,12 +12,15 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 public class ManHunt implements CommandExecutor {
     private final ManHuntPlugin plugin;
@@ -59,6 +63,7 @@ public class ManHunt implements CommandExecutor {
         }
         Player runner = plugin.getRunner();
         runner.getWorld().setTime(1000);
+        runner.getWorld().setDifficulty(Difficulty.HARD);
         setRunner(runner);
         Player[] playerList = Bukkit.getOnlinePlayers().toArray(new Player[0]);
         for (Player p : playerList) {
@@ -72,19 +77,15 @@ public class ManHunt implements CommandExecutor {
     }
 
     private void setRunner(Player runner) {
-        runner.getInventory().clear();
-        runner.getInventory().setHelmet(new ItemStack(Material.LEATHER_HELMET));
-        runner.getInventory().setChestplate(new ItemStack(Material.LEATHER_CHESTPLATE));
-        runner.getInventory().setLeggings(new ItemStack(Material.LEATHER_LEGGINGS));
-        runner.getInventory().setBoots(new ItemStack(Material.LEATHER_BOOTS));
-        runner.getInventory().addItem(new ItemStack(Material.WOODEN_AXE));
-        runner.getInventory().addItem(new ItemStack(Material.OAK_LOG, 5));
-        runner.getInventory().addItem(new ItemStack(Material.COOKED_BEEF, 2));
+        ConfigurationSection config = plugin.getConfig().getConfigurationSection("config.runner");
+        assert config != null;
+        setInventory(runner, config);
         setInitialState(runner);
         runner.sendMessage("You are Runner. RUN!");
+        final int time = plugin.getConfig().getInt("config.hunter.waitting_time");
         new Thread(() -> {
             try {
-                Thread.sleep(15000);
+                Thread.sleep(time * 1000L);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -93,17 +94,77 @@ public class ManHunt implements CommandExecutor {
     }
 
     private void setHunter(Player hunter) {
-        hunter.getInventory().clear();
-        hunter.getInventory().addItem(new ItemStack(Material.COMPASS));
-        hunter.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 300, 0));
-        hunter.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_DIGGING, 300, 128));
-        hunter.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 300, 128));
-        hunter.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 300, 129)); // 129 for -128
-        hunter.addPotionEffect(new PotionEffect(PotionEffectType.HEAL, 300, 128));
+        ConfigurationSection config = plugin.getConfig().getConfigurationSection("config.hunter");
+        assert config != null;
+        setInventory(hunter, config);
+        final int time = config.getInt("waitting_time");
+        final int ticks = time * 20;
+        hunter.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, ticks, 0));
+        hunter.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_DIGGING, ticks, 128));
+        hunter.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, ticks, 128));
+        hunter.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, ticks, 129)); // 129 for -128
+        hunter.addPotionEffect(new PotionEffect(PotionEffectType.HEAL, ticks, 128));
         hunter.setBedSpawnLocation(plugin.getRunner().getLocation(), true);
         setInitialState(hunter);
-        hunter.sendMessage("You are hunter, please wait for 15s.");
-        new Thread(() -> waitingCountdown(hunter, 15)).start();
+        hunter.sendMessage("You are hunter, please wait for " + time + "s.");
+        new Thread(() -> waitingCountdown(hunter, time)).start();
+    }
+
+    private void setInventory(Player player, ConfigurationSection config) {
+        String helmetName = config.getString("helmet");
+        String chestplateName = config.getString("chestplate");
+        String leggingsName = config.getString("leggings");
+        String bootsName = config.getString("boots");
+        List<String> itemsName = config.getStringList("items");
+
+        Material helmet = null;
+        Material chestplate = null;
+        Material leggings = null;
+        Material boots = null;
+
+        if (helmetName != null) {
+            helmet = Material.getMaterial(helmetName);
+        }
+        if (chestplateName != null) {
+            chestplate = Material.getMaterial(chestplateName);
+        }
+        if (leggingsName != null) {
+            leggings = Material.getMaterial(leggingsName);
+        }
+        if (bootsName != null) {
+            boots = Material.getMaterial(bootsName);
+        }
+        List<ItemStack> items = new ArrayList<>();
+        for (String name : itemsName) {
+            String[] info = name.split(" ");
+            Material material = Material.getMaterial(info[0]);
+            if (material != null) {
+                int num = 1;
+                if (info.length > 1) {
+                    num = Integer.parseInt(info[1]);
+                }
+                items.add(new ItemStack(material, num));
+            } else {
+                System.err.println("[ManHunt] Config for Player's item contains error.");
+            }
+        }
+
+        player.getInventory().clear();
+        if (helmet != null) {
+            player.getInventory().setHelmet(new ItemStack(helmet));
+        }
+        if (chestplate != null) {
+            player.getInventory().setChestplate(new ItemStack(chestplate));
+        }
+        if (leggings != null) {
+            player.getInventory().setLeggings(new ItemStack(leggings));
+        }
+        if (boots != null) {
+            player.getInventory().setBoots(new ItemStack(boots));
+        }
+        for (ItemStack item : items) {
+            player.getInventory().addItem(item);
+        }
     }
 
     private void waitingCountdown(Player player, int time) {
