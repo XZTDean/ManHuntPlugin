@@ -8,6 +8,7 @@ import me.deanx.manhunt.listener.Respawn;
 import me.deanx.manhunt.listener.Result;
 import me.deanx.manhunt.listener.RunnerLocation;
 import org.bukkit.Sound;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -24,6 +25,7 @@ public class ManHuntPlugin extends JavaPlugin {
     @Override
     public void onEnable() {
         getLogger().info("ManHunt plugin start");
+        saveDefaultConfig();
         compassNBT = CompassNBT.getInstance();
         new ManHunt(this);
         new ManHuntTabCompleter(this);
@@ -58,8 +60,10 @@ public class ManHuntPlugin extends JavaPlugin {
     public void registerListener() {
         new Respawn(this);
         new Result(this);
-        new RunnerLocation(this);
-        new DropItem(this);
+        if (getConfig().getBoolean("config.game.enable_compass")) {
+            new RunnerLocation(this);
+            new DropItem(this);
+        }
         status = true;
     }
 

@@ -62,8 +62,28 @@ public class ManHunt implements CommandExecutor {
             return "Hunting Game is already running.";
         }
         Player runner = plugin.getRunner();
-        runner.getWorld().setTime(1000);
-        runner.getWorld().setDifficulty(Difficulty.HARD);
+
+        ConfigurationSection config = plugin.getConfig().getConfigurationSection("config.environment");
+        assert config != null;
+        int time = config.getInt("time");
+        runner.getWorld().setTime(time);
+        String difficulty = config.getString("difficulty");
+        if (difficulty != null) {
+            switch (difficulty) {
+                case "HARD":
+                    runner.getWorld().setDifficulty(Difficulty.HARD);
+                    break;
+                case "NORMAL":
+                    runner.getWorld().setDifficulty(Difficulty.NORMAL);
+                    break;
+                case "EASY":
+                    runner.getWorld().setDifficulty(Difficulty.EASY);
+                    break;
+                case "PEACEFUL":
+                    runner.getWorld().setDifficulty(Difficulty.PEACEFUL);
+            }
+        }
+
         setRunner(runner);
         Player[] playerList = Bukkit.getOnlinePlayers().toArray(new Player[0]);
         for (Player p : playerList) {
@@ -187,16 +207,35 @@ public class ManHunt implements CommandExecutor {
     }
 
     private void setInitialState(Player player) {
-        double maxHealth = player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue();
+        ConfigurationSection config = plugin.getConfig().getConfigurationSection("config.game");
+        assert config != null;
+        double maxHealth = config.getDouble("max_health");
+        player.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(maxHealth);
         player.setHealth(maxHealth);
         player.setFoodLevel(20);
         player.setSaturation(5);
-        player.setGameMode(GameMode.SURVIVAL);
+
+        String gamemode = config.getString("gamemode");
+        if (gamemode != null) {
+            switch (gamemode) {
+                case "SURVIVAL":
+                    player.setGameMode(GameMode.SURVIVAL);
+                    break;
+                case "ADVENTURE":
+                    player.setGameMode(GameMode.ADVENTURE);
+                    break;
+                case "CREATIVE":
+                    player.setGameMode(GameMode.CREATIVE);
+            }
+        }
+
         // reset advancement
-        for(Iterator<Advancement> iterator = Bukkit.getServer().advancementIterator(); iterator.hasNext();) {
-            AdvancementProgress progress = player.getAdvancementProgress(iterator.next());
-            for (String criteria : progress.getAwardedCriteria())
-                progress.revokeCriteria(criteria);
+        if (config.getBoolean("clear_advancement")) {
+            for (Iterator<Advancement> iterator = Bukkit.getServer().advancementIterator(); iterator.hasNext(); ) {
+                AdvancementProgress progress = player.getAdvancementProgress(iterator.next());
+                for (String criteria : progress.getAwardedCriteria())
+                    progress.revokeCriteria(criteria);
+            }
         }
 
     }

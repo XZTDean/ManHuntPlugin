@@ -20,6 +20,7 @@ config:
       - COMPASS
     waitting_time: 15
   game:
+    max_health: 20
     enable_compass: true
     clear_advancement: true
     gamemode: SURVIVAL
