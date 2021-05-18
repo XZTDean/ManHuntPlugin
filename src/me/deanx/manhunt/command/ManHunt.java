@@ -129,7 +129,7 @@ public class ManHunt implements CommandExecutor {
         hunter.setBedSpawnLocation(plugin.getRunner().getLocation(), true);
         setInitialState(hunter);
         hunter.sendMessage(plugin.getConfig().getString("string.hunter_start_msg")
-                           .replace("%sec%", String.valueOf(time)));
+                           .replace("$sec$", String.valueOf(time)));
         new Thread(() -> waitingCountdown(hunter, time)).start();
     }
 
@@ -251,10 +251,10 @@ public class ManHunt implements CommandExecutor {
         if (p != null) {
             plugin.setRunner(p);
             Bukkit.getServer().broadcastMessage(plugin.getConfig().getString("string.set_runner")
-                                                .replace("%p%", p.getDisplayName()));
+                                                .replace("$p$", p.getDisplayName()));
             return "";
         } else {
-            return plugin.getConfig().getString("string.cannot_find_player").replace("%p%", name);
+            return plugin.getConfig().getString("string.cannot_find_player").replace("$p$", name);
         }
     }
 }
