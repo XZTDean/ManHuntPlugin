@@ -57,9 +57,9 @@ public class ManHunt implements CommandExecutor {
 
     private String start() {
         if (plugin.getRunner() == null) {
-            return "Please set the runner first";
+            return plugin.getConfig().getString("string.err.runner_empty");
         } else if (plugin.isStart()) {
-            return "Hunting Game is already running.";
+            return plugin.getConfig().getString("string.err.game_running");
         }
         Player runner = plugin.getRunner();
 
@@ -101,7 +101,9 @@ public class ManHunt implements CommandExecutor {
         assert config != null;
         setInventory(runner, config);
         setInitialState(runner);
-        runner.sendMessage("You are Runner. RUN!");
+        runner.setBedSpawnLocation(null);
+        runner.getWorld().setSpawnLocation(runner.getLocation());
+        runner.sendMessage(plugin.getConfig().getString("string.runner_start_msg"));
         final int time = plugin.getConfig().getInt("config.hunter.waitting_time");
         new Thread(() -> {
             try {
@@ -109,7 +111,7 @@ public class ManHunt implements CommandExecutor {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            runner.sendMessage("Hunters start hunting now.");
+            runner.sendMessage(plugin.getConfig().getString("string.runner_hunting_start_msg"));
         }).start();
     }
 
@@ -126,7 +128,8 @@ public class ManHunt implements CommandExecutor {
         hunter.addPotionEffect(new PotionEffect(PotionEffectType.HEAL, ticks, 128));
         hunter.setBedSpawnLocation(plugin.getRunner().getLocation(), true);
         setInitialState(hunter);
-        hunter.sendMessage("You are hunter, please wait for " + time + "s.");
+        hunter.sendMessage(plugin.getConfig().getString("string.hunter_start_msg")
+                           .replace("%sec%", String.valueOf(time)));
         new Thread(() -> waitingCountdown(hunter, time)).start();
     }
 
@@ -242,15 +245,16 @@ public class ManHunt implements CommandExecutor {
 
     private String labelPlayer(String name) {
         if (plugin.isStart()) {
-            return "Cannot change runner during game";
+            return plugin.getConfig().getString("string.err.change_runner_in_game");
         }
         Player p = Bukkit.getPlayer(name);
         if (p != null) {
             plugin.setRunner(p);
-            Bukkit.getServer().broadcastMessage(p.getDisplayName() + " is set to be Runner.");
+            Bukkit.getServer().broadcastMessage(plugin.getConfig().getString("string.set_runner")
+                                                .replace("%p%", p.getDisplayName()));
             return "";
         } else {
-            return "Can't find player " + name;
+            return plugin.getConfig().getString("string.cannot_find_player").replace("%p%", name);
         }
     }
 }

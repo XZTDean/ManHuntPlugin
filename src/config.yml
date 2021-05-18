@@ -24,3 +24,17 @@ config:
     enable_compass: true
     clear_advancement: true
     gamemode: SURVIVAL
+string:
+  runner_start_msg: You are Runner. RUN!
+  runner_hunting_start_msg: Hunters start hunting now.
+  hunter_start_msg: You are hunter, please wait for %sec%s.
+  set_runner: %p% is set to be Runner.
+  cannot_find_player: Cannot find player %p%.
+  win: You Win
+  lose: You Lose
+  runner_dead: Runner is killed
+  runner_enter_nether: Runner Entered Nether
+  err:
+    change_runner_in_game: Cannot change runner during game.
+    runner_empty: Please set the runner first.
+    game_running: Hunting Game is already running.
