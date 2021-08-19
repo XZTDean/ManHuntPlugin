@@ -2,10 +2,7 @@ package me.deanx.manhunt.command;
 
 import me.deanx.manhunt.ManHuntPlugin;
 import me.deanx.manhunt.interfaces.CompassNBT;
-import org.bukkit.Bukkit;
-import org.bukkit.Difficulty;
-import org.bukkit.GameMode;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.advancement.Advancement;
 import org.bukkit.advancement.AdvancementProgress;
 import org.bukkit.attribute.Attribute;

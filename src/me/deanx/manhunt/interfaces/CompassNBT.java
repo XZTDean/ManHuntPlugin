@@ -9,8 +9,8 @@ public interface CompassNBT {
     static CompassNBT getInstance() {
         String version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
         switch (version) {
-            case "v1_16_R3":
-                return CompassNBT_v1_16_R3.getInstance();
+            case "v1_17_R1":
+                return CompassNBT_v1_17_R1.getInstance();
             default:
                 throw new IllegalStateException("Minecraft Version is not accepted.");
         }
