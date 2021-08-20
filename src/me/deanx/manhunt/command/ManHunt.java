@@ -12,6 +12,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
@@ -158,7 +159,9 @@ public class ManHunt implements CommandExecutor {
         for (String name : itemsName) {
             String[] info = name.split(" ");
             Material material = Material.getMaterial(info[0]);
-            if (material != null) {
+            if (material == Material.COMPASS) {
+                giveCompass(player);
+            } else if (material != null) {
                 int num = 1;
                 if (info.length > 1) {
                     num = Integer.parseInt(info[1]);
@@ -200,9 +203,28 @@ public class ManHunt implements CommandExecutor {
     }
 
     private void giveCompass(Player player) {
-        player.getInventory().addItem(new ItemStack(Material.COMPASS));
-        if (plugin.isStart()) {
-            CompassNBT.getInstance().updateInventory(player);
+        PlayerInventory inventory = player.getInventory();
+        if (inventory.contains(Material.COMPASS)) {
+            int index = inventory.first(Material.COMPASS);
+            if (index != 8) {
+                ItemStack itemToSwap = inventory.getItem(8);
+                inventory.setItem(8, inventory.getItem(index));
+                inventory.setItem(index, itemToSwap);
+                player.sendMessage("Swap compass to the last item on the hotbar");
+            }
+        } else {
+            if (inventory.firstEmpty() == -1) {
+                player.sendMessage("Cannot get the compass. Inventory is full.");
+                return;
+            }
+            ItemStack itemIn8 = inventory.getItem(8);
+            inventory.setItem(8, new ItemStack(Material.COMPASS));
+            if (itemIn8 != null) {
+                inventory.addItem(itemIn8);
+            }
+            if (plugin.isStart()) {
+                CompassNBT.getInstance().updateInventory(player);
+            }
         }
     }
 
