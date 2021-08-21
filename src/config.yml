@@ -18,7 +18,7 @@ config:
     boots: null
     items:
       - COMPASS
-    waitting_time: 15
+    waiting_time: 15
   game:
     max_health: 20
     enable_compass: true
