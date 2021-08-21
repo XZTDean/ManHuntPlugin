@@ -1,7 +1,6 @@
 package me.deanx.manhunt.command;
 
 import me.deanx.manhunt.ManHuntPlugin;
-import me.deanx.manhunt.interfaces.CompassNBT;
 import me.deanx.manhunt.listener.DamageDuringWaiting;
 import org.bukkit.*;
 import org.bukkit.advancement.Advancement;
@@ -227,7 +226,7 @@ public class ManHunt implements CommandExecutor {
                 inventory.addItem(itemIn8);
             }
             if (plugin.isStart()) {
-                CompassNBT.getInstance().updateInventory(player);
+                player.setCompassTarget(plugin.getRunner().getLocation());
             }
         }
     }
