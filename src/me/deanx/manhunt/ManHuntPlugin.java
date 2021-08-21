@@ -2,11 +2,11 @@ package me.deanx.manhunt;
 
 import me.deanx.manhunt.command.ManHunt;
 import me.deanx.manhunt.command.ManHuntTabCompleter;
-import me.deanx.manhunt.interfaces.CompassNBT;
 import me.deanx.manhunt.listener.DropItem;
 import me.deanx.manhunt.listener.Respawn;
 import me.deanx.manhunt.listener.Result;
 import me.deanx.manhunt.listener.RunnerLocation;
+import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
@@ -18,7 +18,6 @@ import java.util.List;
 public class ManHuntPlugin extends JavaPlugin {
     private Player runner;
     private boolean status;
-    private CompassNBT compassNBT;
     private final List<Player> hunters = new ArrayList<>();
 
     @Override
@@ -27,7 +26,6 @@ public class ManHuntPlugin extends JavaPlugin {
         saveDefaultConfig();
         getConfig().options().copyDefaults(true);
         saveConfig();
-        compassNBT = CompassNBT.getInstance();
         new ManHunt(this);
         new ManHuntTabCompleter(this);
     }
@@ -102,9 +100,9 @@ public class ManHuntPlugin extends JavaPlugin {
     }
 
     public void updateCompass() {
-        compassNBT.updateCompass(runner);
+        Location location = runner.getLocation();
         for (Player hunter : hunters) {
-            compassNBT.updateInventory(hunter);
+            hunter.setCompassTarget(location);
         }
     }
 }

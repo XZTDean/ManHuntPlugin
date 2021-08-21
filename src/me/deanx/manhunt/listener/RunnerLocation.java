@@ -18,7 +18,7 @@ public class RunnerLocation implements Listener {
     @EventHandler
     public void onRunnerMove(PlayerMoveEvent event) {
         Player player = event.getPlayer();
-        if (player == plugin.getRunner() && event.getFrom().getBlock().equals(event.getTo().getBlock())) {
+        if (player == plugin.getRunner()) {
             plugin.updateCompass();
         }
     }
