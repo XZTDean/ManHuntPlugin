@@ -210,11 +210,11 @@ public class ManHunt implements CommandExecutor {
                 ItemStack itemToSwap = inventory.getItem(8);
                 inventory.setItem(8, inventory.getItem(index));
                 inventory.setItem(index, itemToSwap);
-                player.sendMessage("Swap compass to the last item on the hotbar");
+                player.sendMessage(plugin.getConfig().getString("string.compass_swap"));
             }
         } else {
             if (inventory.firstEmpty() == -1) {
-                player.sendMessage("Cannot get the compass. Inventory is full.");
+                player.sendMessage(plugin.getConfig().getString("string.err.compass_add"));
                 return;
             }
             ItemStack itemIn8 = inventory.getItem(8);
