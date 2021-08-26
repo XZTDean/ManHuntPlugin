@@ -15,10 +15,12 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 
 public class ManHunt implements CommandExecutor {
     private final ManHuntPlugin plugin;
@@ -44,6 +46,8 @@ public class ManHunt implements CommandExecutor {
             }
         } else if (args[0].equalsIgnoreCase("runner")) {
             ret = labelPlayer(args[1]);
+        } else if (args[0].equalsIgnoreCase("random")) {
+            ret = randomPlayer();
         } else {
             return false;
         }
@@ -261,12 +265,45 @@ public class ManHunt implements CommandExecutor {
         }
         Player p = Bukkit.getPlayer(name);
         if (p != null) {
-            plugin.setRunner(p);
-            Bukkit.getServer().broadcastMessage(plugin.getConfig().getString("string.set_runner")
-                                                .replace("$p$", p.getDisplayName()));
+            labelRunner(p);
             return "";
         } else {
             return plugin.getConfig().getString("string.cannot_find_player").replace("$p$", name);
+        }
+    }
+
+    private void labelRunner(Player p) {
+        plugin.setRunner(p);
+        Bukkit.getServer().broadcastMessage(plugin.getConfig().getString("string.set_runner")
+                                            .replace("$p$", p.getDisplayName()));
+    }
+
+    private String randomPlayer() {
+        if (plugin.isStart()) {
+            return plugin.getConfig().getString("string.err.change_runner_in_game");
+        }
+        Player[] playerList = Bukkit.getOnlinePlayers().toArray(new Player[0]);
+        int random = new Random().nextInt(playerList.length);
+        Player selectedPlayer = playerList[random];
+        selectionAnimation(selectedPlayer);
+        labelRunner(selectedPlayer);
+        return "";
+    }
+
+    private void selectionAnimation(Player selected) {
+        Player[] playerList = Bukkit.getOnlinePlayers().toArray(new Player[0]);
+        Random r = new Random();
+        BukkitTask task = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+            int random = r.nextInt(playerList.length);
+            String name = playerList[random].getDisplayName();
+            for (Player p : playerList) {
+                p.sendTitle(name, null, 0, 5, 0);
+            }
+        }, 0, 2);
+        Bukkit.getScheduler().runTaskLater(plugin, task::cancel, 60);
+        String name = selected.getDisplayName();
+        for (Player p : playerList) {
+            p.sendTitle(name, null, 0, 20, 5);
         }
     }
 }
