@@ -68,17 +68,10 @@ public class ManHunt implements CommandExecutor {
         String difficulty = config.getString("difficulty");
         if (difficulty != null) {
             switch (difficulty) {
-                case "HARD":
-                    runner.getWorld().setDifficulty(Difficulty.HARD);
-                    break;
-                case "NORMAL":
-                    runner.getWorld().setDifficulty(Difficulty.NORMAL);
-                    break;
-                case "EASY":
-                    runner.getWorld().setDifficulty(Difficulty.EASY);
-                    break;
-                case "PEACEFUL":
-                    runner.getWorld().setDifficulty(Difficulty.PEACEFUL);
+                case "HARD" -> runner.getWorld().setDifficulty(Difficulty.HARD);
+                case "NORMAL" -> runner.getWorld().setDifficulty(Difficulty.NORMAL);
+                case "EASY" -> runner.getWorld().setDifficulty(Difficulty.EASY);
+                case "PEACEFUL" -> runner.getWorld().setDifficulty(Difficulty.PEACEFUL);
             }
         }
 
@@ -105,7 +98,7 @@ public class ManHunt implements CommandExecutor {
         runner.setBedSpawnLocation(null);
         runner.getWorld().setSpawnLocation(runner.getLocation());
         runner.sendMessage(plugin.getConfig().getString("string.runner_start_msg"));
-        final int time = plugin.getConfig().getInt("config.hunter.waitting_time");
+        final int time = plugin.getConfig().getInt("config.hunter.waiting_time");
         new Thread(() -> {
             try {
                 Thread.sleep(time * 1000L);
@@ -120,7 +113,7 @@ public class ManHunt implements CommandExecutor {
         ConfigurationSection config = plugin.getConfig().getConfigurationSection("config.hunter");
         assert config != null;
         setInventory(hunter, config);
-        final int time = config.getInt("waitting_time");
+        final int time = config.getInt("waiting_time");
         final int ticks = time * 20;
         hunter.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, ticks, 0));
         hunter.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_DIGGING, ticks, 128));
@@ -158,7 +151,10 @@ public class ManHunt implements CommandExecutor {
         if (bootsName != null) {
             boots = Material.getMaterial(bootsName);
         }
+
         List<ItemStack> items = new ArrayList<>();
+        player.getInventory().clear();
+
         for (String name : itemsName) {
             String[] info = name.split(" ");
             Material material = Material.getMaterial(info[0]);
@@ -175,7 +171,6 @@ public class ManHunt implements CommandExecutor {
             }
         }
 
-        player.getInventory().clear();
         if (helmet != null) {
             player.getInventory().setHelmet(new ItemStack(helmet));
         }
@@ -243,14 +238,9 @@ public class ManHunt implements CommandExecutor {
         String gamemode = config.getString("gamemode");
         if (gamemode != null) {
             switch (gamemode) {
-                case "SURVIVAL":
-                    player.setGameMode(GameMode.SURVIVAL);
-                    break;
-                case "ADVENTURE":
-                    player.setGameMode(GameMode.ADVENTURE);
-                    break;
-                case "CREATIVE":
-                    player.setGameMode(GameMode.CREATIVE);
+                case "SURVIVAL" -> player.setGameMode(GameMode.SURVIVAL);
+                case "ADVENTURE" -> player.setGameMode(GameMode.ADVENTURE);
+                case "CREATIVE" -> player.setGameMode(GameMode.CREATIVE);
             }
         }
 

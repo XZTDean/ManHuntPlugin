@@ -21,7 +21,7 @@ public class Respawn implements Listener {
     public void onRespawn(PlayerRespawnEvent event) {
         Player player = event.getPlayer();
         if (plugin.isHunter(player)) {
-            player.getInventory().addItem(new ItemStack(Material.COMPASS));
+            player.getInventory().setItem(8, new ItemStack(Material.COMPASS));
         }
     }
 }
