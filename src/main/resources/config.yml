@@ -18,7 +18,7 @@ config:
     boots: null
     items:
       - COMPASS
-    waitting_time: 15
+    waiting_time: 15
   game:
     max_health: 20
     enable_compass: true
@@ -34,7 +34,9 @@ string:
   lose: You Lose
   runner_dead: Runner is killed
   runner_enter_nether: Runner Entered Nether
+  compass_swap: Swap compass to the last item on the hotbar
   err:
     change_runner_in_game: Cannot change runner during game.
     runner_empty: Please set the runner first.
     game_running: Hunting Game is already running.
+    compass_add: Cannot get the compass. Inventory is full.

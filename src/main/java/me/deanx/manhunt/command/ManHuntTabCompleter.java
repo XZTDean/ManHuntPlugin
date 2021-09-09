@@ -11,7 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class ManHuntTabCompleter implements TabCompleter {
-    private final List<String> COMMANDS = Arrays.asList("start", "stop", "compass", "runner");
+    private final List<String> COMMANDS = Arrays.asList("start", "stop", "compass", "runner", "random");
 
     public ManHuntTabCompleter(ManHuntPlugin plugin) {
         plugin.getCommand("ManHunt").setTabCompleter(this);
@@ -26,7 +26,7 @@ public class ManHuntTabCompleter implements TabCompleter {
                 break;
             case 2:
                 if (args[0].equalsIgnoreCase("runner")) {
-                    return null;
+                    return null; // hint will be default (Player list)
                 }
                 break;
         }

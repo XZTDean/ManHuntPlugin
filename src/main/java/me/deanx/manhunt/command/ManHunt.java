@@ -1,11 +1,8 @@
 package me.deanx.manhunt.command;
 
 import me.deanx.manhunt.ManHuntPlugin;
-import me.deanx.manhunt.interfaces.CompassNBT;
-import org.bukkit.Bukkit;
-import org.bukkit.Difficulty;
-import org.bukkit.GameMode;
-import org.bukkit.Material;
+import me.deanx.manhunt.listener.DamageDuringWaiting;
+import org.bukkit.*;
 import org.bukkit.advancement.Advancement;
 import org.bukkit.advancement.AdvancementProgress;
 import org.bukkit.attribute.Attribute;
@@ -13,14 +10,19 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 
 public class ManHunt implements CommandExecutor {
     private final ManHuntPlugin plugin;
@@ -46,6 +48,8 @@ public class ManHunt implements CommandExecutor {
             }
         } else if (args[0].equalsIgnoreCase("runner")) {
             ret = labelPlayer(args[1]);
+        } else if (args[0].equalsIgnoreCase("random")) {
+            ret = randomPlayer();
         } else {
             return false;
         }
@@ -66,23 +70,25 @@ public class ManHunt implements CommandExecutor {
         ConfigurationSection config = plugin.getConfig().getConfigurationSection("config.environment");
         assert config != null;
         int time = config.getInt("time");
-        runner.getWorld().setTime(time);
+        World world = runner.getWorld();
+        world.setTime(time);
         String difficulty = config.getString("difficulty");
         if (difficulty != null) {
             switch (difficulty) {
                 case "HARD":
-                    runner.getWorld().setDifficulty(Difficulty.HARD);
+                    world.setDifficulty(Difficulty.HARD);
                     break;
                 case "NORMAL":
-                    runner.getWorld().setDifficulty(Difficulty.NORMAL);
+                    world.setDifficulty(Difficulty.NORMAL);
                     break;
                 case "EASY":
-                    runner.getWorld().setDifficulty(Difficulty.EASY);
+                    world.setDifficulty(Difficulty.EASY);
                     break;
                 case "PEACEFUL":
-                    runner.getWorld().setDifficulty(Difficulty.PEACEFUL);
+                    world.setDifficulty(Difficulty.PEACEFUL);
             }
         }
+        removeItemsOnGround(world);
 
         setRunner(runner);
         Player[] playerList = Bukkit.getOnlinePlayers().toArray(new Player[0]);
@@ -93,6 +99,9 @@ public class ManHunt implements CommandExecutor {
             }
         }
         plugin.registerListener();
+        final int waitingTime = config.getInt("waiting_time");
+        DamageDuringWaiting damagePrevent = new DamageDuringWaiting(plugin);
+        Bukkit.getScheduler().runTaskLater(plugin, damagePrevent::unregister, waitingTime * 20L);
         return "";
     }
 
@@ -104,7 +113,7 @@ public class ManHunt implements CommandExecutor {
         runner.setBedSpawnLocation(null);
         runner.getWorld().setSpawnLocation(runner.getLocation());
         runner.sendMessage(plugin.getConfig().getString("string.runner_start_msg"));
-        final int time = plugin.getConfig().getInt("config.hunter.waitting_time");
+        final int time = plugin.getConfig().getInt("config.hunter.waiting_time");
         new Thread(() -> {
             try {
                 Thread.sleep(time * 1000L);
@@ -119,7 +128,7 @@ public class ManHunt implements CommandExecutor {
         ConfigurationSection config = plugin.getConfig().getConfigurationSection("config.hunter");
         assert config != null;
         setInventory(hunter, config);
-        final int time = config.getInt("waitting_time");
+        final int time = config.getInt("waiting_time");
         final int ticks = time * 20;
         hunter.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, ticks, 0));
         hunter.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_DIGGING, ticks, 128));
@@ -131,6 +140,15 @@ public class ManHunt implements CommandExecutor {
         hunter.sendMessage(plugin.getConfig().getString("string.hunter_start_msg")
                            .replace("$sec$", String.valueOf(time)));
         new Thread(() -> waitingCountdown(hunter, time)).start();
+    }
+
+    private void removeItemsOnGround(World world) {
+        List<Entity> entities = world.getEntities();
+        for (Entity entity : entities) {
+            if (entity instanceof Item) {
+                entity.remove();
+            }
+        }
     }
 
     private void setInventory(Player player, ConfigurationSection config) {
@@ -157,11 +175,16 @@ public class ManHunt implements CommandExecutor {
         if (bootsName != null) {
             boots = Material.getMaterial(bootsName);
         }
+
         List<ItemStack> items = new ArrayList<>();
+        player.getInventory().clear();
+
         for (String name : itemsName) {
             String[] info = name.split(" ");
             Material material = Material.getMaterial(info[0]);
-            if (material != null) {
+            if (material == Material.COMPASS) {
+                giveCompass(player);
+            } else if (material != null) {
                 int num = 1;
                 if (info.length > 1) {
                     num = Integer.parseInt(info[1]);
@@ -172,7 +195,6 @@ public class ManHunt implements CommandExecutor {
             }
         }
 
-        player.getInventory().clear();
         if (helmet != null) {
             player.getInventory().setHelmet(new ItemStack(helmet));
         }
@@ -203,9 +225,28 @@ public class ManHunt implements CommandExecutor {
     }
 
     private void giveCompass(Player player) {
-        player.getInventory().addItem(new ItemStack(Material.COMPASS));
-        if (plugin.isStart()) {
-            CompassNBT.getInstance().updateInventory(player);
+        PlayerInventory inventory = player.getInventory();
+        if (inventory.contains(Material.COMPASS)) {
+            int index = inventory.first(Material.COMPASS);
+            if (index != 8) {
+                ItemStack itemToSwap = inventory.getItem(8);
+                inventory.setItem(8, inventory.getItem(index));
+                inventory.setItem(index, itemToSwap);
+                player.sendMessage(plugin.getConfig().getString("string.compass_swap"));
+            }
+        } else {
+            if (inventory.firstEmpty() == -1) {
+                player.sendMessage(plugin.getConfig().getString("string.err.compass_add"));
+                return;
+            }
+            ItemStack itemIn8 = inventory.getItem(8);
+            inventory.setItem(8, new ItemStack(Material.COMPASS));
+            if (itemIn8 != null) {
+                inventory.addItem(itemIn8);
+            }
+            if (plugin.isStart()) {
+                player.setCompassTarget(plugin.getRunner().getLocation());
+            }
         }
     }
 
@@ -249,12 +290,49 @@ public class ManHunt implements CommandExecutor {
         }
         Player p = Bukkit.getPlayer(name);
         if (p != null) {
-            plugin.setRunner(p);
-            Bukkit.getServer().broadcastMessage(plugin.getConfig().getString("string.set_runner")
-                                                .replace("$p$", p.getDisplayName()));
+            labelRunner(p);
             return "";
         } else {
             return plugin.getConfig().getString("string.cannot_find_player").replace("$p$", name);
         }
+    }
+
+    private void labelRunner(Player p) {
+        plugin.setRunner(p);
+        Bukkit.getServer().broadcastMessage(plugin.getConfig().getString("string.set_runner")
+                                            .replace("$p$", p.getDisplayName()));
+    }
+
+    private String randomPlayer() {
+        if (plugin.isStart()) {
+            return plugin.getConfig().getString("string.err.change_runner_in_game");
+        }
+        Player[] playerList = Bukkit.getOnlinePlayers().toArray(new Player[0]);
+        int random = new Random().nextInt(playerList.length);
+        Player selectedPlayer = playerList[random];
+        selectionAnimation(selectedPlayer);
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            labelRunner(selectedPlayer);
+        }, 60);
+        return "";
+    }
+
+    private void selectionAnimation(Player selected) {
+        Player[] playerList = Bukkit.getOnlinePlayers().toArray(new Player[0]);
+        Random r = new Random();
+        BukkitTask task = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+            int random = r.nextInt(playerList.length);
+            String name = playerList[random].getDisplayName();
+            for (Player p : playerList) {
+                p.sendTitle(name, null, 0, 5, 0);
+            }
+        }, 0, 2);
+        String name = ChatColor.RED + selected.getDisplayName();
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            task.cancel();
+            for (Player p : playerList) {
+                p.sendTitle(name, null, 0, 20, 5);
+            }
+        }, 60);
     }
 }
