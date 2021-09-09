@@ -72,10 +72,17 @@ public class ManHunt implements CommandExecutor {
         String difficulty = config.getString("difficulty");
         if (difficulty != null) {
             switch (difficulty) {
-                case "HARD" -> runner.getWorld().setDifficulty(Difficulty.HARD);
-                case "NORMAL" -> runner.getWorld().setDifficulty(Difficulty.NORMAL);
-                case "EASY" -> runner.getWorld().setDifficulty(Difficulty.EASY);
-                case "PEACEFUL" -> runner.getWorld().setDifficulty(Difficulty.PEACEFUL);
+                case "HARD":
+                    runner.getWorld().setDifficulty(Difficulty.HARD);
+                    break;
+                case "NORMAL":
+                    runner.getWorld().setDifficulty(Difficulty.NORMAL);
+                    break;
+                case "EASY":
+                    runner.getWorld().setDifficulty(Difficulty.EASY);
+                    break;
+                case "PEACEFUL":
+                    runner.getWorld().setDifficulty(Difficulty.PEACEFUL);
             }
         }
 
@@ -242,9 +249,14 @@ public class ManHunt implements CommandExecutor {
         String gamemode = config.getString("gamemode");
         if (gamemode != null) {
             switch (gamemode) {
-                case "SURVIVAL" -> player.setGameMode(GameMode.SURVIVAL);
-                case "ADVENTURE" -> player.setGameMode(GameMode.ADVENTURE);
-                case "CREATIVE" -> player.setGameMode(GameMode.CREATIVE);
+                case "SURVIVAL":
+                    player.setGameMode(GameMode.SURVIVAL);
+                    break;
+                case "ADVENTURE":
+                    player.setGameMode(GameMode.ADVENTURE);
+                    break;
+                case "CREATIVE":
+                    player.setGameMode(GameMode.CREATIVE);
             }
         }
 
@@ -300,10 +312,12 @@ public class ManHunt implements CommandExecutor {
                 p.sendTitle(name, null, 0, 5, 0);
             }
         }, 0, 2);
-        Bukkit.getScheduler().runTaskLater(plugin, task::cancel, 60);
         String name = selected.getDisplayName();
-        for (Player p : playerList) {
-            p.sendTitle(name, null, 0, 20, 5);
-        }
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            task.cancel();
+            for (Player p : playerList) {
+                p.sendTitle(name, null, 0, 20, 5);
+            }
+        }, 60);
     }
 }
