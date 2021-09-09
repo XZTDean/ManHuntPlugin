@@ -298,7 +298,9 @@ public class ManHunt implements CommandExecutor {
         int random = new Random().nextInt(playerList.length);
         Player selectedPlayer = playerList[random];
         selectionAnimation(selectedPlayer);
-        labelRunner(selectedPlayer);
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            labelRunner(selectedPlayer);
+        }, 60);
         return "";
     }
 
@@ -312,7 +314,7 @@ public class ManHunt implements CommandExecutor {
                 p.sendTitle(name, null, 0, 5, 0);
             }
         }, 0, 2);
-        String name = selected.getDisplayName();
+        String name = ChatColor.RED + selected.getDisplayName();
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
             task.cancel();
             for (Player p : playerList) {
