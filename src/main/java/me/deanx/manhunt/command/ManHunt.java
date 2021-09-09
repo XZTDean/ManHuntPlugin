@@ -10,6 +10,8 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -68,23 +70,25 @@ public class ManHunt implements CommandExecutor {
         ConfigurationSection config = plugin.getConfig().getConfigurationSection("config.environment");
         assert config != null;
         int time = config.getInt("time");
-        runner.getWorld().setTime(time);
+        World world = runner.getWorld();
+        world.setTime(time);
         String difficulty = config.getString("difficulty");
         if (difficulty != null) {
             switch (difficulty) {
                 case "HARD":
-                    runner.getWorld().setDifficulty(Difficulty.HARD);
+                    world.setDifficulty(Difficulty.HARD);
                     break;
                 case "NORMAL":
-                    runner.getWorld().setDifficulty(Difficulty.NORMAL);
+                    world.setDifficulty(Difficulty.NORMAL);
                     break;
                 case "EASY":
-                    runner.getWorld().setDifficulty(Difficulty.EASY);
+                    world.setDifficulty(Difficulty.EASY);
                     break;
                 case "PEACEFUL":
-                    runner.getWorld().setDifficulty(Difficulty.PEACEFUL);
+                    world.setDifficulty(Difficulty.PEACEFUL);
             }
         }
+        removeItemsOnGround(world);
 
         setRunner(runner);
         Player[] playerList = Bukkit.getOnlinePlayers().toArray(new Player[0]);
@@ -136,6 +140,15 @@ public class ManHunt implements CommandExecutor {
         hunter.sendMessage(plugin.getConfig().getString("string.hunter_start_msg")
                            .replace("$sec$", String.valueOf(time)));
         new Thread(() -> waitingCountdown(hunter, time)).start();
+    }
+
+    private void removeItemsOnGround(World world) {
+        List<Entity> entities = world.getEntities();
+        for (Entity entity : entities) {
+            if (entity instanceof Item) {
+                entity.remove();
+            }
+        }
     }
 
     private void setInventory(Player player, ConfigurationSection config) {
