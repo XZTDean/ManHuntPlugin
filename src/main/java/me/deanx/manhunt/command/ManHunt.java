@@ -1,7 +1,7 @@
 package me.deanx.manhunt.command;
 
 import me.deanx.manhunt.ManHuntPlugin;
-import me.deanx.manhunt.listener.DamageDuringWaiting;
+import me.deanx.manhunt.listener.WaitingTimeControl;
 import org.bukkit.*;
 import org.bukkit.advancement.Advancement;
 import org.bukkit.advancement.AdvancementProgress;
@@ -99,9 +99,8 @@ public class ManHunt implements CommandExecutor {
             }
         }
         plugin.registerListener();
-        final int waitingTime = config.getInt("waiting_time");
-        DamageDuringWaiting damagePrevent = new DamageDuringWaiting(plugin);
-        Bukkit.getScheduler().runTaskLater(plugin, damagePrevent::unregister, waitingTime * 20L);
+        final long waitingTime = plugin.getConfig().getLong("config.hunter.waiting_time");
+        new WaitingTimeControl(plugin, waitingTime * 20);
         return "";
     }
 
