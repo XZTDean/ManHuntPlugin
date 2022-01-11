@@ -64,6 +64,8 @@ public class ManHunt implements CommandExecutor {
             return plugin.getConfig().getString("string.err.runner_empty");
         } else if (plugin.isStart()) {
             return plugin.getConfig().getString("string.err.game_running");
+        } else if (Bukkit.getOnlinePlayers().size() < 2) {
+            return plugin.getConfig().getString("string.err.not_enough_player");
         }
         Player runner = plugin.getRunner();
 
@@ -131,8 +133,6 @@ public class ManHunt implements CommandExecutor {
         final int ticks = time * 20;
         hunter.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, ticks, 0));
         hunter.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_DIGGING, ticks, 128));
-        hunter.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, ticks, 128));
-        hunter.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, ticks, 129)); // 129 for -128
         hunter.addPotionEffect(new PotionEffect(PotionEffectType.HEAL, ticks, 128));
         hunter.setBedSpawnLocation(plugin.getRunner().getLocation(), true);
         setInitialState(hunter);
