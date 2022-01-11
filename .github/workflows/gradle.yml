@@ -55,7 +55,7 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
       - name: Download minecraft new build
-        run: wget -q https://papermc.io/api/v1/paper/1.18.1/latest/download -O paper.jar
+        run: wget -q https://papermc.io/api/v2/projects/paper/versions/1.18.1/builds/147/downloads/paper-1.18.1-147.jar -O paper.jar
       - name: Download needed plugins
         run: |
           mkdir plugins && cd plugins
